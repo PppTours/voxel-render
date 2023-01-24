@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define CHUNK_SIZE 64
 #define REGION_SIZE 8
@@ -10,7 +11,7 @@
 typedef uint64_t Block;
 
 // Represents a chunk, which is a renderable unit.
-typedef struct Chunk {
+typedef struct Chunk /*{
   // If the chunk has been allocated.
   bool isAllocated;
 
@@ -22,15 +23,17 @@ typedef struct Chunk {
   Block *data;
   
   // ...
-} Chunk;
+}*/ Chunk;
 
 // Represents a region which is a container for chunks.
+#if 0
 typedef struct Region {
   struct Chunk chunks[REGION_SIZE * REGION_SIZE * REGION_SIZE];
 } Region;
+#endif
 
 // Initialize a chunk.
-bool Chunk_init(Chunk *self);
+Chunk *Chunk_init(void);
 
 // Cleanup a chunk.
 void Chunk_cleanup(Chunk *self);
@@ -42,6 +45,6 @@ bool Chunk_getBlockRef(const Chunk *self, Block **reference, size_t x, size_t y,
 bool Chunk_getBlock(const Chunk *self, Block *out, size_t x, size_t y, size_t z);
 
 // Set a block value in a chunk.
-bool Chunk_setBlock(const Chunk *self, const Block *in, size_t x, size_t y, size_t z);
+bool Chunk_setBlock(Chunk *self, const Block in, size_t x, size_t y, size_t z);
 
 #endif

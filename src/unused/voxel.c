@@ -20,7 +20,7 @@ bool Chunk_init(Chunk *self)
 void Chunk_cleanup(Chunk *self)
 {
   free(self->data);
-  *self->data = NULL;
+  self->data = NULL;
 
   self->isAllocated = false;
   self->isEmpty = true;
@@ -33,7 +33,7 @@ bool Chunk_getBlockRef(const Chunk *self, Block **reference, size_t x, size_t y,
 
   if (x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
     // Out of bounds
-    *reference = true;
+    *reference = NULL;
     return true;
   }
 
@@ -52,13 +52,13 @@ bool Chunk_getBlock(const Chunk *self, Block *out, size_t x, size_t y, size_t z)
   return false;
 }
 
-bool Chunk_setBlock(const Chunk *self, const Block *in, size_t x, size_t y, size_t z)
+bool Chunk_setBlock(Chunk *self, const Block in, size_t x, size_t y, size_t z)
 {
   Block *reference;
 
   if (Chunk_getBlockRef(self, &reference, x, y, z))
     return true;
   
-  *reference = *in;
+  *reference = in;
   return false;
 }
