@@ -1,5 +1,5 @@
-CFLAGS := -O2 -s
-LDFLAGS := -O2 -s -lm
+CFLAGS := -O0 -ggdb
+LDFLAGS := -O0 -ggdb -lm
 
 SRC := src/voxel.c
 OBJ := $(SRC:.c=.o)

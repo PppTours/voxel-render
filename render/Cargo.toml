@@ -9,5 +9,4 @@ crate-type = ["staticlib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-glium = { version = "*", default-features = false }
-glium_derive = "*"
+glium = { git = "https://github.com/TSnake41/glium", version = "*", default-features = false }

@@ -1,6 +1,7 @@
 #ifndef H_VOXEL
 #define H_VOXEL
 
+#include <raylib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -46,5 +47,13 @@ bool Chunk_getBlock(const Chunk *self, Block *out, size_t x, size_t y, size_t z)
 
 // Set a block value in a chunk.
 bool Chunk_setBlock(Chunk *self, const Block in, size_t x, size_t y, size_t z);
+
+typedef struct VoxelRender VoxelRender; // opaque
+
+VoxelRender *VoxelRender_init(void *procfn, uint32_t width, uint32_t height); // width/height succeptibles d'être enlevés^M
+
+void VoxelRender_cleanup(VoxelRender *render);
+
+void VoxelRender_drawCube(VoxelRender *render, Matrix *mat);
 
 #endif

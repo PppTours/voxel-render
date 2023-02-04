@@ -17,4 +17,11 @@ testing:
 test: render testing
 	testing/voxel
 
+debug: render testing
+	gdb testing/voxel
+
+clean:
+	cd render && cargo clean
+	$(MAKE) -C testing clean
+
 .PHONY: render testing test

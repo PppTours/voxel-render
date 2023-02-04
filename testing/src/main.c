@@ -1,7 +1,11 @@
 #include <stddef.h>
 
 #include "raylib.h"
+#include "raymath.h"
+#include "rlgl.h"
 #include "voxel.h"
+
+#include "GLFW/glfw3.h"
 
 int main(void)
 {
@@ -9,14 +13,15 @@ int main(void)
   SetTargetFPS(60);
 
   Camera3D camera = { 0 };
-  camera.position = (Vector3){ 100.0f, 100.0f, 100.0f };
-  camera.target = (Vector3){ 32.0f, 32.0f, 32.0f };
+  camera.position = (Vector3){ 25.0f, 25.0f, 25.0f };
+  camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
   camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };     
   camera.fovy = 45.0f;         
   camera.projection = CAMERA_PERSPECTIVE;
 
   SetCameraMode(camera, CAMERA_FREE);
 
+  VoxelRender *render = VoxelRender_init(glfwGetProcAddress, 1280, 720);
   Chunk *chunk = Chunk_init();
 
   for (size_t x = 0; x < CHUNK_SIZE; x++)
@@ -38,28 +43,23 @@ int main(void)
     ClearBackground(RAYWHITE);
 
     DrawFPS(10, 10);
-    // DrawText("Hello World !", 190, 200, 20, LIGHTGRAY);
+    DrawText("Hello World !", 190, 200, 20, LIGHTGRAY);
 
     BeginMode3D(camera);
     DrawGrid(100, 1.0f);
 
-    for (size_t x = 0; x < CHUNK_SIZE; x++)
-      for (size_t y = 0; y < CHUNK_SIZE; y++)
-        for (size_t z = 0; z < CHUNK_SIZE; z++) {
-          Block block;
-          Chunk_getBlock(chunk , &block, x, y, z);
-
-          if (block)
-            DrawCube((Vector3){ .x = x, .y = y, .z = z }, 1.0f, 1.0f, 1.0f, GetColor(block));
-        }
+    rlDisableBackfaceCulling();
+    rlDrawRenderBatchActive();
+    Matrix matrix = MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection());
+    VoxelRender_drawCube(render, &matrix);
     
-
     EndMode3D();
 
     EndDrawing();
   }
 
   Chunk_cleanup(chunk);
+  VoxelRender_cleanup(render);
 
   CloseWindow();
 
