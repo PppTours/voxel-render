@@ -1,6 +1,2 @@
-*.o
-*.res
-*.a
-voxel
-voxel.exe
-libvoxel.a
+.cache
+build
