@@ -19,7 +19,7 @@ int main(void)
   camera.fovy = 45.0f;         
   camera.projection = CAMERA_PERSPECTIVE;
 
-  SetCameraMode(camera, CAMERA_FREE);
+  SetCameraMode(camera, CAMERA_ORBITAL);
 
   VoxelRender *render = VoxelRender_init(glfwGetProcAddress, 1280, 720);
   Chunk *chunk = Chunk_init();
@@ -42,18 +42,21 @@ int main(void)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawFPS(10, 10);
-    DrawText("Hello World !", 190, 200, 20, LIGHTGRAY);
-
     BeginMode3D(camera);
     DrawGrid(100, 1.0f);
 
-    rlDisableBackfaceCulling();
+    rlEnableDepthTest();
+
     rlDrawRenderBatchActive();
     Matrix matrix = MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection());
     VoxelRender_drawCube(render, &matrix);
+
+    DrawCube((Vector3){ 0.25, 0.25, 0.25 }, .5, .5, .5, RED);
     
     EndMode3D();
+
+    DrawFPS(10, 10);
+    DrawText("Hello World !", 190, 200, 20, LIGHTGRAY);
 
     EndDrawing();
   }
