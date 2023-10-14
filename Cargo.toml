@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 raylib = { branch = "4.5.0-redesign", git = "https://github.com/TSnake41/raylib-rs" }
+
+bevy_ecs = "0.11"
+uuid = { version = "1.4", features = ["v4"] }
