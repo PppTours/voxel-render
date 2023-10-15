@@ -77,3 +77,6 @@ impl GameInput {
         println!("{self:#?}");
     }
 }
+
+#[derive(Clone, Copy, Resource, Default)]
+pub struct DeltaTime(pub f32);

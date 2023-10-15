@@ -1,140 +1,43 @@
 pub mod components;
 pub mod renderer;
 pub mod systems;
+pub mod world;
 
 use bevy_ecs::prelude::*;
-use raylib::{
-    core::texture::RenderTexture2D,
-    ffi::{mint::Vector3, Camera3D, CameraProjection},
-    prelude::*,
-};
+use raylib::prelude::*;
 
-use components::{Cube, GameInput, Player, Position};
-use renderer::RaylibRenderer;
+use components::{Cube, DeltaTime, GameInput, Player, Position};
+use renderer::{RaylibRenderer, RenderState};
 use systems::{display_cube, update_player_camera};
-
-pub struct PlayerRenderState<'bind, 'a> {
-    camera: Camera3D,
-    framebuffer: RenderTexture2D<'bind, 'a>,
-}
-
-pub struct RenderState<'bind, 'a> {
-    players: [PlayerRenderState<'bind, 'a>; 2],
-}
-
-impl<'bind, 'a> RenderState<'bind, 'a> {
-    pub fn init(rl: &'bind RaylibHandle, t: &RaylibThread, cameras: [Camera3D; 2]) -> Self {
-        Self {
-            players: [
-                PlayerRenderState {
-                    camera: cameras[0],
-                    framebuffer: rl
-                        .load_render_texture(
-                            t,
-                            (rl.get_screen_width() / 2) as _,
-                            rl.get_screen_height() as _,
-                        )
-                        .expect("Unable to create RenderTexture"),
-                },
-                PlayerRenderState {
-                    camera: cameras[1],
-                    framebuffer: rl
-                        .load_render_texture(
-                            t,
-                            (rl.get_screen_width() / 2) as _,
-                            rl.get_screen_height() as _,
-                        )
-                        .expect("Unable to create RenderTexture"),
-                },
-            ],
-        }
-    }
-}
+use world::init_world;
 
 fn main() {
-    let (rl, t) = raylib::init().width(1280).height(800).vsync().build();
+    let (rl, t) = raylib::init()
+        .msaa_4x()
+        .title("polyfps")
+        .vsync()
+        .size(1920, 1000)
+        .build();
     rl.disable_cursor();
 
     let mut world = World::new();
     world.insert_resource(RaylibRenderer::default());
     world.insert_resource(GameInput::default());
+    world.insert_resource(DeltaTime::default());
 
     let mut schedule = Schedule::default();
-    schedule.add_systems(display_cube);
-    schedule.add_systems(update_player_camera);
+    schedule.add_systems((display_cube, update_player_camera));
 
-    let player0 = Player {
-        camera: Camera3D {
-            position: Vector3 {
-                x: 0f32,
-                y: 0f32,
-                z: 0f32,
-            },
-            target: Vector3 {
-                x: 1f32,
-                y: 1f32,
-                z: 1f32,
-            },
-            up: Vector3 {
-                x: 0f32,
-                y: 1f32,
-                z: 0f32,
-            },
-            fovy: 70f32,
-            projection: CameraProjection::CAMERA_PERSPECTIVE as _,
-        },
-        id: 0,
-    };
-    world.spawn((
-        player0,
-        Position(player0.camera.position),
-        Cube {
-            color: Color::BLUE,
-            size: Vector3 {
-                x: 1f32,
-                y: 1f32,
-                z: 1f32,
-            },
-        },
-    ));
+    let (player0, player1) = init_world(&mut world);
 
-    let mut player1 = player0.clone();
-    player1.id = 1;
-
-    world.spawn((
-        player1,
-        Position(player1.camera.position),
-        Cube {
-            color: Color::YELLOW,
-            size: Vector3 {
-                x: 1f32,
-                y: 1f32,
-                z: 1f32,
-            },
-        },
-    ));
-
-    world.spawn((
-        Position(Vector3 {
-            x: 1f32,
-            y: 1f32,
-            z: 1f32,
-        }),
-        Cube {
-            color: Color::RED,
-            size: Vector3 {
-                x: 1f32,
-                y: 1f32,
-                z: 1f32,
-            },
-        },
-    ));
-
-    let mut render_state = RenderState::init(&rl, &t, [player0.camera, player1.camera]);
+    let mut render_state = RenderState::new(&rl, &t, [player0.camera, player1.camera]);
 
     while !rl.window_should_close() {
-        let mut input: Mut<GameInput> = world.get_resource_mut().unwrap();
-        input.update_inputs(&rl);
+        world
+            .get_resource_mut::<GameInput>()
+            .unwrap()
+            .update_inputs(&rl);
+        world.get_resource_mut::<DeltaTime>().unwrap().0 = rl.get_frame_time();
 
         schedule.run(&mut world);
 
