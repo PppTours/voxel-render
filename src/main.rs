@@ -15,8 +15,8 @@ fn main() {
     let (rl, t) = raylib::init()
         .msaa_4x()
         .title("polyfps")
-        .vsync()
-        .size(1920, 1000)
+        //.vsync()
+        .size(1280, 720)
         .build();
     rl.disable_cursor();
 
@@ -30,7 +30,7 @@ fn main() {
 
     let (player0, player1) = init_world(&mut world);
 
-    let mut render_state = RenderState::new(&rl, &t, [player0.camera, player1.camera]);
+    let mut render_state = RenderState::new(&rl, &t, [player0, player1]);
 
     while !rl.window_should_close() {
         world
@@ -43,7 +43,7 @@ fn main() {
 
         for entity in world.query_filtered::<Entity, &Player>().iter(&world) {
             let player: &Player = world.get(entity).unwrap();
-            render_state.players[player.id as usize].camera = player.camera;
+            render_state.players[player.id as usize].player = player.clone();
         }
 
         let mut renderer: Mut<RaylibRenderer> = world.get_resource_mut().unwrap();

@@ -1,12 +1,21 @@
 use bevy_ecs::{component::Component, system::Resource};
-use raylib::{ffi::{mint::Vector3, Camera3D, Color, KeyboardKey}, prelude::RaylibHandle};
+use nalgebra::{Rotation2, Vector2, Vector3};
+use raylib::{
+    ffi::{Color, KeyboardKey},
+    prelude::RaylibHandle,
+};
 
 #[derive(Clone, Copy, Component)]
 pub struct Position(pub Vector3<f32>);
 
 #[derive(Clone, Copy, Component, Debug)]
 pub struct Player {
-    pub camera: Camera3D,
+    pub position: Vector2<f32>,
+    pub rotation: Rotation2<f32>,
+
+    pub height: f32,
+    pub velocity: Vector3<f32>,
+
     pub id: u32,
 }
 

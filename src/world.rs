@@ -1,7 +1,8 @@
 use bevy_ecs::world::World;
+use nalgebra::{Rotation2, Vector2};
 use raylib::ffi::{Camera3D, CameraProjection, Color, Vector3};
 
-use crate::components::{Cube, Player, Position};
+use crate::components::{Cube, Player, PlayerPosition, Position};
 
 pub fn init_world(world: &mut World) -> (Player, Player) {
     let player0 = Player {
@@ -29,6 +30,10 @@ pub fn init_world(world: &mut World) -> (Player, Player) {
     world.spawn((
         player0,
         Position(player0.camera.position),
+        PlayerPosition {
+            position: Vector2::new(0.0, 0.0),
+            rotation: Rotation2::identity(),
+        },
         Cube {
             color: Color::BLUE,
             size: Vector3 {
@@ -45,6 +50,10 @@ pub fn init_world(world: &mut World) -> (Player, Player) {
     world.spawn((
         player1,
         Position(player1.camera.position),
+        PlayerPosition {
+            position: Vector2::new(0.0, 0.0),
+            rotation: Rotation2::identity(),
+        },
         Cube {
             color: Color::YELLOW,
             size: Vector3 {
