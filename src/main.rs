@@ -12,11 +12,11 @@ use systems::{display_cube, update_player_camera};
 use world::init_world;
 
 fn main() {
-    let (rl, t) = raylib::init()
+    let rl = raylib::init()
         .msaa_4x()
         .title("polyfps")
         //.vsync()
-        .size(1280, 720)
+        .size(800, 480)
         .build();
     rl.disable_cursor();
 
@@ -30,7 +30,7 @@ fn main() {
 
     let (player0, player1) = init_world(&mut world);
 
-    let mut render_state = RenderState::new(&rl, &t, [player0, player1]);
+    let mut render_state = RenderState::new(&rl, [player0, player1]);
 
     while !rl.window_should_close() {
         world
@@ -48,30 +48,20 @@ fn main() {
 
         let mut renderer: Mut<RaylibRenderer> = world.get_resource_mut().unwrap();
 
-        rl.begin_drawing(&t, |d| {
+        rl.begin_drawing(|d| {
             d.clear_background(Color::SKYBLUE);
 
             // Render players viewpoints
-            for (player_id, player_render_state) in render_state.players.iter_mut().enumerate() {
-                d.begin_texture(&mut player_render_state.framebuffer, || {
+            for player_id in [0, 1] {
+                render_state.begin_player(&d, player_id, |d| {
                     d.clear_background(Color::SKYBLUE);
-
-                    d.begin_camera_3d(&player_render_state.camera, || {
-                        renderer.render(&d, player_id as u32)
-                    });
-                });
-
-                if player_id == 0 {
-                    d.draw_texture(&player_render_state.framebuffer, 0, 0, Color::WHITE);
-                } else if player_id == 1 {
-                    d.draw_texture(
-                        &player_render_state.framebuffer,
-                        rl.get_screen_width() / 2,
-                        0,
-                        Color::WHITE,
-                    );
-                }
+                    d.draw_text(&format!("test"), 0, 0, 10, Color::BLACK);
+                }, |d| {
+                    renderer.render(d, player_id);
+                })
             }
+
+            render_state.draw(&d);
 
             d.draw_fps(10, 10);
         });
