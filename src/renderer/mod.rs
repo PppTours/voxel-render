@@ -1,13 +1,13 @@
 use std::cell::RefMut;
 
 use bevy_ecs::system::Resource;
-use nalgebra::{Matrix4, Point3, Quaternion, Vector3};
+use nalgebra::{Matrix4, Vector3};
 use raylib::{
     core::texture::RenderTexture2D,
     ffi::{
-        rlDrawRenderBatchActive, rlLoadIdentity, rlMatrixMode, rlOrtho, rlPopMatrix, rlPushMatrix,
-        rlRotatef, rlSetMatrixModelview, rlSetMatrixProjection, rlTranslatef, RL_CULL_DISTANCE_FAR,
-        RL_CULL_DISTANCE_NEAR, RL_MODELVIEW, RL_PROJECTION,
+        mint::ColumnMatrix4, rlDrawRenderBatchActive, rlEnableDepthTest, rlMatrixMode, rlPopMatrix,
+        rlPushMatrix, rlSetMatrixModelview, rlSetMatrixProjection, Matrix, DEG2RAD,
+        RL_CULL_DISTANCE_FAR, RL_CULL_DISTANCE_NEAR, RL_MODELVIEW, RL_PROJECTION,
     },
     prelude::*,
 };
@@ -84,6 +84,9 @@ pub struct RenderState<'rl> {
     fb_width: i32,
 }
 
+const CAMERA_FOVY: f32 = 70.0;
+const CAMERA_ASPECT: f32 = 8f32 / 9f32; // 16/9 / 2
+
 impl<'rl> RenderState<'rl> {
     pub fn new(rl: &'rl RaylibHandle, players: [Player; 2]) -> Self {
         Self {
@@ -112,10 +115,8 @@ impl<'rl> RenderState<'rl> {
     }
 
     fn get_player_modelview_matrix(player: &Player) -> Matrix4<f32> {
-        println!("{}", player.rotation.angle());
-        Matrix4::new_rotation_wrt_point(
-            Vector3::y() * player.rotation.angle() * 0.0f32,
-            Point3::new(player.position.x, player.height, player.position.y),
+        Matrix4::from_euler_angles(0.0, player.rotation.angle(), 0.0).prepend_translation(
+            &Vector3::new(player.position.x, player.height, player.position.y),
         )
     }
 
@@ -142,30 +143,22 @@ impl<'rl> RenderState<'rl> {
             // SAFE: Raylib is initialized (`d` existence requirement).
             unsafe {
                 rlDrawRenderBatchActive();
+                rlEnableDepthTest();
 
-                rlMatrixMode(RL_PROJECTION as _);
                 rlPushMatrix();
-                rlSetMatrixProjection(
+                rlMatrixMode(RL_PROJECTION as _);
+                rlSetMatrixProjection(Matrix::from(Into::<ColumnMatrix4<f32>>::into(
                     Matrix4::new_perspective(
-                        8f32 / 9f32, // hardcoded
-                        70f32,
+                        CAMERA_ASPECT,
+                        CAMERA_FOVY * (DEG2RAD as f32),
                         RL_CULL_DISTANCE_NEAR as _,
                         RL_CULL_DISTANCE_FAR as _,
-                    )
-                    .transpose()
-                    .into(),
-                );
+                    ),
+                )));
                 rlMatrixMode(RL_MODELVIEW as _);
-                rlLoadIdentity();
-                rlRotatef(render_state.player.rotation.angle(), 0.0, 1.0, 0.0);
-                rlTranslatef(
-                    render_state.player.position.x,
-                    render_state.player.height,
-                    render_state.player.position.y,
-                );
-                //rlSetMatrixModelview(
-                //    Self::get_player_modelview_matrix(&render_state.player).into(),
-                //);
+                rlSetMatrixModelview(Matrix::from(Into::<ColumnMatrix4<f32>>::into(
+                    Self::get_player_modelview_matrix(&render_state.player),
+                )));
             }
 
             world(d);

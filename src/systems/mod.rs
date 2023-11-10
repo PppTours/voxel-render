@@ -26,7 +26,9 @@ pub fn display_cube(
     }
 }
 
-const UP_VECTOR: Vector2<f32> = Vector2::new(1.0, 0.0);
+const UP_VECTOR: Vector2<f32> = Vector2::new(0.0, 1.0);
+const PLAYER_SPEED: f32 = 2.5;
+const ROTATION_SENSIVITY: f32 = 1.5;
 
 pub fn update_player_camera(
     input: Res<GameInput>,
@@ -39,22 +41,22 @@ pub fn update_player_camera(
             let mut new_pos = player.position.clone();
 
             if player_input.move_forward {
-                new_pos += &player.rotation.transform_vector(&UP_VECTOR) * dt.0;
+                new_pos += PLAYER_SPEED * &player.rotation.transform_vector(&UP_VECTOR) * dt.0;
             }
 
             if player_input.move_backward {
-                new_pos -= &player.rotation.transform_vector(&UP_VECTOR) * dt.0;
+                new_pos -= PLAYER_SPEED * &player.rotation.transform_vector(&UP_VECTOR) * dt.0;
             }
 
             if player_input.move_right {
-                new_pos += (&player.rotation * Rotation2::new(PI / 2f32))
-                    .transform_vector(&UP_VECTOR)
+                new_pos += PLAYER_SPEED
+                    * (&player.rotation * Rotation2::new(PI / 2.0)).transform_vector(&UP_VECTOR)
                     * dt.0;
             }
 
             if player_input.move_left {
-                new_pos += (&player.rotation * Rotation2::new(-PI / 2f32))
-                    .transform_vector(&UP_VECTOR)
+                new_pos += PLAYER_SPEED
+                    * (&player.rotation * Rotation2::new(-PI / 2.0)).transform_vector(&UP_VECTOR)
                     * dt.0;
             }
 
@@ -67,13 +69,13 @@ pub fn update_player_camera(
             }
 
             if player_input.view_right {
-                player.rotation *= Rotation2::new(0.01 * PI / (2f32 * dt.0));
+                player.rotation *= Rotation2::new(ROTATION_SENSIVITY * dt.0 * PI / 2.0);
                 //player.camera.yaw(-3f32 * dt.0, false);
             }
 
             if player_input.view_left {
                 //player.camera.yaw(3f32 * dt.0, false);
-                player.rotation *= Rotation2::new(0.01 * -PI / (2f32 * dt.0));
+                player.rotation *= Rotation2::new(ROTATION_SENSIVITY * dt.0 * -PI / 2.0);
             }
 
             player.position = new_pos;

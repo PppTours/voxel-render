@@ -15,7 +15,7 @@ fn main() {
     let rl = raylib::init()
         .msaa_4x()
         .title("polyfps")
-        //.vsync()
+        .vsync()
         .size(800, 480)
         .build();
     rl.disable_cursor();
