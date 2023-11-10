@@ -116,7 +116,7 @@ impl<'rl> RenderState<'rl> {
 
     fn get_player_modelview_matrix(player: &Player) -> Matrix4<f32> {
         Matrix4::from_euler_angles(0.0, player.rotation.angle(), 0.0).prepend_translation(
-            &Vector3::new(player.position.x, player.height, player.position.y),
+            &Vector3::new(-player.position.x, -player.height, -player.position.y),
         )
     }
 

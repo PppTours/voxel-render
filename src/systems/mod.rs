@@ -26,7 +26,7 @@ pub fn display_cube(
     }
 }
 
-const UP_VECTOR: Vector2<f32> = Vector2::new(0.0, 1.0);
+const UP_VECTOR: Vector2<f32> = Vector2::new(0.0, -1.0);
 const PLAYER_SPEED: f32 = 2.5;
 const ROTATION_SENSIVITY: f32 = 1.5;
 
